@@ -1,0 +1,32 @@
+#docker-compose -f haiku-compose.yaml up --force-recreate --build -d
+version: '3'
+services:
+  haiku-web:
+    restart: always
+    container_name: haiku_web
+    build:
+      dockerfile: ./haiku-web.dockerfile
+      context: .
+    environment:
+      VIRTUAL_HOST: haikupotamus.com
+      LETSENCRYPT_HOST: haikupotamus.com
+
+  haiku-ws:
+    restart: always
+    container_name: haiku_server
+    build:
+      dockerfile: ./haiku-server.dockerfile
+      context: .
+    #ports:
+    #- "8004:8004"
+    environment:
+      VIRTUAL_HOST: ws.haikupotamus.com
+      VIRTUAL_PORT: 443
+      LETSENCRYPT_HOST: ws.haikupotamus.com
+      LETSENCRYPT_EMAIL: glen@glenmurphy.com
+      WEBSOCKETS: 1
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
