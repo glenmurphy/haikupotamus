@@ -21,12 +21,12 @@ body {
 <body></body>
 <script type="text/javascript" src="util.js"></script>
 <script type="module">
-import { Haiku } from './haiku.js';
+import { Haikupotamus } from './haikupotamus.js';
 
 var host = (location.hostname.indexOf("localhost") == -1) ?
   "wss://ws." + location.hostname + ":443/" :
   "ws://" + location.hostname + ":8004";
 
-new Haiku(host);
+window.h = new Haikupotamus(host);
 </script>
 </html>

@@ -24,7 +24,7 @@ END
 
 # Run our app server
 cd ../server
-deno run -A ./haiku.js & pid2=$!
+deno run -A ./haikupotamus.js & pid2=$!
 
 # When the user presses Ctrl+C, kill the bg processes we just spawned
 trap "kill -9 $pid1 $pid2" INT
