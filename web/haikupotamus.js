@@ -4,7 +4,7 @@ export class Haikupotamus {
 
     this.host = host;
 
-    // Precache
+    // Precache so we don't destroy the lookup server
     this.syllables = {
       'ARE':1,'AND':1,'HAIKU':2,'THE':1,
       'SYLLABLES':3, 'COUNTING':2,'WORDS':1,'FLOWING':2,'FROM':1,'YOUR':1,'FINGERS':2,
@@ -147,7 +147,7 @@ export class Haikupotamus {
 
   // This is naive - it assumes vowel blocks are indicators of syllables
   // you can see how this breaks down with words like 'aria' vs 'are'
-  vowels = ['A', 'E', 'I', 'O', 'U', 'Y'];
+  vowels = ['A', 'E', 'I', 'O', 'U', 'Y']; // standardize would've stripped off trailing .
   guessSyllables(word) {
     if (word in this.guesses)
       return this.guesses[word];
@@ -156,9 +156,13 @@ export class Haikupotamus {
     var inVowel = false;
     var s = 0;
     for(var i = 0; i < word.length; i++) {
+      console.log(word[i]);
       if (this.vowels.includes(word[i])) {
         s += inVowel ? 0 : 1; 
         inVowel = true;
+      } else if (word[i] == '.') { // URLs
+        s += 1;
+        inVowel = false;
       } else {
         inVowel = false;
       }
@@ -179,10 +183,11 @@ export class Haikupotamus {
     return this.guessSyllables(word);
   }
 
-  // standarizes the word - makes it ready for lookup, trims punctuation that
-  // might confuse things.
+  // standarizes the word 
+  // - makes it ready for lookup (caps)
+  // - trims trailing punctuation (periods, commas etc)
   standardizeWord(word) {
-    return word.toUpperCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+    return word.toUpperCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]+$/g,"");
   }
 
   updateCounts() {
