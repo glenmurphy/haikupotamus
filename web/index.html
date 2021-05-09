@@ -5,6 +5,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Haiku syllable counter">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.ico" type="image/x-icon" />
 <style type="text/css">
 body {
@@ -27,6 +29,6 @@ var host = (location.hostname.indexOf("localhost") == -1) ?
   "wss://ws." + location.hostname + ":443/" :
   "ws://" + location.hostname + ":8004";
 
-window.h = new Haikupotamus(host);
+new Haikupotamus(host);
 </script>
 </html>

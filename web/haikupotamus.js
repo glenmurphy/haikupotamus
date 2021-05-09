@@ -12,14 +12,27 @@ export class Haikupotamus {
 
     this.elm = c({class : 'haiku', parent : document.body})
     this.input = c({class : 'input', type : 'textarea', parent : this.elm});
-    this.input.value = "syllables counted\nwords flowing across the page\nhaikupotamus"
-    this.input.setAttribute('cols', 60);
+    //this.input.value = "syllables counted\nwords flowing across the page\nhaikupotamus"
+    this.input.setAttribute('cols', 40);
+    this.input.addEventListener('keydown', this.handleKeyDown.bind(this));
     this.input.addEventListener('keyup', this.handleInputKey.bind(this));
     this.input.addEventListener('blur', this.handleInputBlur.bind(this));
+
+    this.img = c({type : 'img', class : 'icopot', parent : document.body});
+    this.img.src = 'icopotamus.png';
 
     this.counts = c({class : 'counts', type : 'textarea', parent : this.elm});
     this.sendQueue = [];
     this.requested = {};
+
+    if (window.location.hash)
+      this.fromHash();
+    else
+      this.input.value = "counting syllables\nwords flowing from your fingers\nhaikupotamus";
+
+    // this could get circular
+    window.addEventListener('hashchange', this.handleHashChanged.bind(this));
+
     this.fetchCounts();
   }
 
@@ -59,6 +72,40 @@ export class Haikupotamus {
     this.input.focus();
   }
 
+  handleKeyDown(e) {
+    if (e.keyCode == 13) {
+      if ((this.input.value.match(/\n/g) || []).length >= 3) {
+        e.preventDefault();
+        return false;
+      }
+    }
+  }
+
+  updateHash() {
+    var b64 = btoa(this.input.value).replace(/=+$/, "");
+    window.history.pushState('', '', '/#' + b64 + '1');
+  }
+
+  handleHashChanged(e) {
+    console.log("hash changed");
+    this.fromHash();
+  }
+
+  fromHash() {
+    var str = window.location.hash.substring(1);
+    var v = str.substring(str.length - 1);
+    
+    try {
+      switch (v) {
+        case '1': // version 1
+          this.input.value = atob(str.substring(0, str.length - 1));
+          break;
+      }
+    } catch(e) {console.log(e);}
+    this.updateCounts();
+    this.fetchCounts();
+  }
+
   handleInputKey(e) {
     // local lookup
     this.updateCounts();
@@ -67,6 +114,8 @@ export class Haikupotamus {
     if (this.lookupDelay)
       clearTimeout(this.lookupDelay);
     this.lookupDelay = setTimeout(this.fetchCounts.bind(this), 400);
+
+    this.updateHash();
   }
 
   requestWords(words) {
@@ -79,7 +128,8 @@ export class Haikupotamus {
   guessSyllables(word) {
     if (word in this.guesses)
       return this.guesses[word];
-  
+    if (!word) return 0;
+
     var inVowel = false;
     var s = 0;
     for(var i = 0; i < word.length; i++) {
@@ -90,12 +140,13 @@ export class Haikupotamus {
         inVowel = false;
       }
     }
+    if (s == 0) s = 1;
     this.guesses[word] = s;
     return s;
   }
 
   getSyllables(word) {
-    word = word.toUpperCase();
+    word = this.standardizeWord(word);
     if (word in this.syllables) {
       if (typeof this.syllables[word] == "number")
         return this.syllables[word];
@@ -103,6 +154,12 @@ export class Haikupotamus {
         return this.syllables[word][0]; // TODO: handle multiple
     }
     return this.guessSyllables(word);
+  }
+
+  // standarizes the word - makes it ready for lookup, trims punctuation that
+  // might confuse things.
+  standardizeWord(word) {
+    return word.toUpperCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
   }
 
   updateCounts() {
@@ -117,7 +174,7 @@ export class Haikupotamus {
       this.counts.value += s + "\n";
 
       // Handle line wrapping (exceeded textarea cols)
-      var wraps = parseInt(lines[i].length / 60);
+      var wraps = parseInt(lines[i].length / this.input.cols);
       for (var u = 0; u < wraps; u++) {
         this.counts.value += "\n";
       }
@@ -130,7 +187,7 @@ export class Haikupotamus {
 
     for (var i = 0; i < lines.length; i++) {
       lines[i].split(" ").forEach(word => {
-        word = word.toUpperCase();
+        word = this.standardizeWord(word);
         if (!(word in this.syllables) && !(word in this.requested)) {
           req.push(word);
           this.requested[word] = true;
@@ -165,10 +222,8 @@ Haikupotamus.initGlobals = function() {
   appendStyle(`
   .haiku {
     position:absolute;
-    left:50%;
-    top:50%;
-    margin-left:-200px;
-    margin-top:-100px;
+    left:max(0px, calc(50% - 200px));
+    top:max(0px, calc(50% - 100px));
     box-sizing: border-box;
     background-color:#090909;
     padding:5px;
@@ -177,11 +232,12 @@ Haikupotamus.initGlobals = function() {
     padding-left:3px;
     box-sizing: border-box;
     background-color:#000;
-    font-size:12px;
-    color:#ff7;
+    overflow:hidden;
+    font-size:14px;
+    color:#eee;
     border:0px;
     resize:none;
-    font-family: 'Monaco', 'Consolas', 'Inconsolata', monospace;
+    font-family: 'Roboto Mono', 'Monaco', 'Consolas', monospace;
   }
   textarea:focus {
     border:0px;
@@ -191,9 +247,9 @@ Haikupotamus.initGlobals = function() {
     position:absolute;
     left:0px;
     top:0px;
-    width:45px;
-    height:200px;
-    color:#993;
+    width:40px;
+    height:150px;
+    color:#555;
 
     text-align: right;
     white-space: normal;
@@ -202,7 +258,19 @@ Haikupotamus.initGlobals = function() {
     position:absolute;
     left:50px;
     top:0px;
-    height:200px;
+    height:150px;
+  }
+  .icopot {
+    position:absolute;
+    opacity:0.65;
+    left:max(50px, calc(50% - 150px));
+    top:max(150px, calc(100% - 48px));
+    width:32px;
+    height:32px;
+    cursor:pointer;
+  }
+  .icopot:hover {
+    transform: scaleY(-1) translate(0, -10px);
   }
   `);
   Haikupotamus.inited = true;
