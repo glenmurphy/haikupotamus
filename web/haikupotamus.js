@@ -18,8 +18,14 @@ export class Haikupotamus {
     this.input.addEventListener('keyup', this.handleInputKey.bind(this));
     this.input.addEventListener('blur', this.handleInputBlur.bind(this));
 
-    this.img = c({type : 'img', class : 'icopot', parent : document.body});
+    this.hippo = c({ class : 'hippo', parent : document.body});
+    
+    this.img = c({type : 'img', class : 'icopot', parent : this.hippo});
     this.img.src = 'icopotamus.png';
+    this.img.addEventListener('click', this.handleImageClick.bind(this));
+
+    this.hippoText = c({class : 'hippo-text', parent : this.hippo});
+    this.hippoText.innerText = '';
 
     this.counts = c({class : 'counts', type : 'textarea', parent : this.elm});
     this.sendQueue = [];
@@ -72,6 +78,16 @@ export class Haikupotamus {
     this.input.focus();
   }
 
+  handleImageClick(e) {
+    navigator.clipboard.writeText(window.location);
+    this.hippoText.innerText = '- Link copied to clipboard';
+
+    if (this.clearHippoText) clearTimeout(this.clearHippoText)
+    this.clearHippoText = setTimeout(() => {
+      this.hippoText.innerText = '';
+    }, 1800);
+  }
+
   handleKeyDown(e) {
     if (e.keyCode == 13) {
       if ((this.input.value.match(/\n/g) || []).length >= 3) {
@@ -111,8 +127,7 @@ export class Haikupotamus {
     this.updateCounts();
 
     // delay population of local dictionary
-    if (this.lookupDelay)
-      clearTimeout(this.lookupDelay);
+    if (this.lookupDelay) clearTimeout(this.lookupDelay);
     this.lookupDelay = setTimeout(this.fetchCounts.bind(this), 400);
 
     this.updateHash();
@@ -260,17 +275,32 @@ Haikupotamus.initGlobals = function() {
     top:0px;
     height:150px;
   }
+  .hippo {
+    position:absolute;
+    left:max(50px, calc(50% - 150px));
+    top:max(150px, calc(100% - 48px));
+  }
   .icopot {
     position:absolute;
     opacity:0.65;
-    left:max(50px, calc(50% - 150px));
-    top:max(150px, calc(100% - 48px));
     width:32px;
     height:32px;
     cursor:pointer;
   }
-  .icopot:hover {
-    transform: scaleY(-1) translate(0, -10px);
+  .icopot:active {
+    transform: scaleY(-1);
+  }
+  .icopot:hover + .hippo-text {
+    display:block;
+  }
+  .hippo-text {
+    display:none;
+    position:absolute;
+    opacity:0.5;
+    overflow:hidden;
+    width:200px;
+    left:40px;
+    top:10px;
   }
   `);
   Haikupotamus.inited = true;
