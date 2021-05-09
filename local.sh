@@ -19,7 +19,7 @@ Handler.extensions_map = {
 	'': 'application/octet-stream',
 }
 socketserver.TCPServer(("", 8000), Handler).serve_forever()
-print("Serving at http://localhost:8000/web/")
+print("Serving at http://localhost:8000/")
 END
 
 # Run our app server

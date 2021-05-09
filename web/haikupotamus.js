@@ -156,7 +156,6 @@ export class Haikupotamus {
     var inVowel = false;
     var s = 0;
     for(var i = 0; i < word.length; i++) {
-      console.log(word[i]);
       if (this.vowels.includes(word[i])) {
         s += inVowel ? 0 : 1; 
         inVowel = true;
