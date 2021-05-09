@@ -3,17 +3,24 @@ export class Haikupotamus {
     Haikupotamus.initGlobals();
 
     this.host = host;
+
+    // Precache
     this.syllables = {
-      'HAIKUPOTAMUS'  : 5
+      'ARE':1,'AND':1,'HAIKU':2,'THE':1,
+      'SYLLABLES':3, 'COUNTING':2,'WORDS':1,'FLOWING':2,'FROM':1,'YOUR':1,'FINGERS':2,
+      'HAIKUPOTAMUS':5
     };
     this.guesses = {};
+    this.sendQueue = [];
+    this.requested = {};
 
     this.connect();
 
     this.elm = c({class : 'haiku', parent : document.body})
     this.input = c({class : 'input', type : 'textarea', parent : this.elm});
-    //this.input.value = "syllables counted\nwords flowing across the page\nhaikupotamus"
     this.input.setAttribute('cols', 40);
+    this.input.setAttribute('spellcheck', false);
+    this.input.setAttribute('maxlength', 255);
     this.input.addEventListener('keydown', this.handleKeyDown.bind(this));
     this.input.addEventListener('keyup', this.handleInputKey.bind(this));
     this.input.addEventListener('blur', this.handleInputBlur.bind(this));
@@ -22,14 +29,14 @@ export class Haikupotamus {
     
     this.img = c({type : 'img', class : 'icopot', parent : this.hippo});
     this.img.src = 'icopotamus.png';
+    this.img.setAttribute('alt', "a haikupotamus");
     this.img.addEventListener('click', this.handleImageClick.bind(this));
 
     this.hippoText = c({class : 'hippo-text', parent : this.hippo});
     this.hippoText.innerText = '';
 
     this.counts = c({class : 'counts', type : 'textarea', parent : this.elm});
-    this.sendQueue = [];
-    this.requested = {};
+    this.counts.cols = 1;
 
     if (window.location.hash)
       this.fromHash();
@@ -39,7 +46,7 @@ export class Haikupotamus {
     // this could get circular
     window.addEventListener('hashchange', this.handleHashChanged.bind(this));
 
-    this.fetchCounts();
+    this.updateCounts();
   }
 
   connect() {
@@ -79,6 +86,7 @@ export class Haikupotamus {
   }
 
   handleImageClick(e) {
+    this.updateHash();
     navigator.clipboard.writeText(window.location);
     this.hippoText.innerText = '- Link copied to clipboard';
 
@@ -248,7 +256,7 @@ Haikupotamus.initGlobals = function() {
     box-sizing: border-box;
     background-color:#000;
     overflow:hidden;
-    font-size:14px;
+    font-size:12px;
     color:#eee;
     border:0px;
     resize:none;
@@ -265,9 +273,8 @@ Haikupotamus.initGlobals = function() {
     width:40px;
     height:150px;
     color:#555;
-
+    white-space: pre-wrap;
     text-align: right;
-    white-space: normal;
   }
   .input {
     position:absolute;
@@ -282,13 +289,17 @@ Haikupotamus.initGlobals = function() {
   }
   .icopot {
     position:absolute;
-    opacity:0.65;
+    opacity:0.5;
     width:32px;
     height:32px;
     cursor:pointer;
   }
+  .icopot:hover {
+    opacity:1;
+  }
   .icopot:active {
     transform: scaleY(-1);
+    cursor:none;
   }
   .icopot:hover + .hippo-text {
     display:block;
@@ -296,11 +307,11 @@ Haikupotamus.initGlobals = function() {
   .hippo-text {
     display:none;
     position:absolute;
-    opacity:0.5;
+    opacity:0.75;
     overflow:hidden;
     width:200px;
-    left:40px;
-    top:10px;
+    left:38px;
+    top:6px;
   }
   `);
   Haikupotamus.inited = true;
