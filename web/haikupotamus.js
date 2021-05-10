@@ -6,9 +6,9 @@ export class Haikupotamus {
 
     // Precache so we don't destroy the lookup server
     this.syllables = {
-      'ARE':1,'AND':1,'HAIKU':2,'THE':1,
-      'SYLLABLES':3, 'COUNTING':2,'WORDS':1,'FLOWING':2,'FROM':1,'YOUR':1,'FINGERS':2,
-      'HAIKUPOTAMUS':5
+      'ARE':1,'AND':1,'HAIKU':2,'THE':1,'A':1,'FOR':1,'YOU':1,'YOUR':1,
+      'SYLLABLES':3,'COUNTING':2,'WONDERFUL':3,'WORDS':1,'FULFILL':2,
+      'HAIKUPOTAMUS':5,
     };
     this.guesses = {};
     this.sendQueue = [];
@@ -41,7 +41,7 @@ export class Haikupotamus {
     if (window.location.hash)
       this.fromHash();
     else
-      this.input.value = "counting syllables\nwords flowing from your fingers\nhaikupotamus";
+      this.input.value = "counting syllables\nthe wonderful words fulfill\nhaikupotamus";
 
     // this could get circular
     window.addEventListener('hashchange', this.handleHashChanged.bind(this));
@@ -142,6 +142,7 @@ export class Haikupotamus {
   }
 
   requestWords(words) {
+    console.log(words);
     this.send(JSON.stringify(words));
   }
 
@@ -186,7 +187,7 @@ export class Haikupotamus {
   // - makes it ready for lookup (caps)
   // - trims trailing punctuation (periods, commas etc)
   standardizeWord(word) {
-    return word.toUpperCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]+$/g,"");
+    return word.toUpperCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]+$/, "");
   }
 
   updateCounts() {

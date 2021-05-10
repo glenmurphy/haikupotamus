@@ -23,22 +23,24 @@ class Haikupotamus {
   handleMessage(conn, words) {
     try {
       words = JSON.parse(words);
+
+      var res = {};
+      var resp = false;
+
+      words.forEach(word => {
+        word = word.toUpperCase();
+        this.wordPopularity[word] = this.wordPopularity[word] + 1;
+        if (word in this.syllables) {
+          res[word] = this.syllables[word];
+          resp = true;
+        }
+      });
+      
+      if (resp)
+        conn.send(JSON.stringify(res));
     } catch(e) {
       console.log(e);
-      return;
     }
-
-    var res = {};
-
-    words.forEach(word => {
-      word = word.toUpperCase();
-      this.wordPopularity[word] = this.wordPopularity[word] + 1;
-      if (word in this.syllables)
-        res[word] = this.syllables[word];
-    });
-    
-    if (Object.keys(res).length > 0)
-      conn.send(JSON.stringify(res));
   }
 }
 
