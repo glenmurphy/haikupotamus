@@ -1,2 +1,2 @@
 # haikupotamus
-[haikupotamus.com](haikupotamus.com)
+[haikupotamus.com](https://haikupotamus.com/)
