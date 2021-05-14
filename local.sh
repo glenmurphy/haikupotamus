@@ -4,23 +4,7 @@ echo "Running local dev environment; Ctrl+C to exit"
 
 # Set up a local server with the right mime-types
 cd web
-python3 << END & pid1=$!
-import http.server, socketserver
-Handler = http.server.SimpleHTTPRequestHandler
-Handler.extensions_map = {
-  '.manifest': 'text/cache-manifest',
-	'.html':'text/html',
-  '.png':'image/png',
-	'.jpg':'image/jpg',
-	'.svg':'image/svg+xml',
-	'.css':'text/css',
-	'.js':'application/x-javascript',
-	'.mjs':'application/x-javascript',
-	'': 'application/octet-stream',
-}
-socketserver.TCPServer(("", 8000), Handler).serve_forever()
-print("Serving at http://localhost:8000/")
-END
+deno run --allow-net --allow-read https://deno.land/std@0.96.0/http/file_server.ts -p 8000 & pid1=$!
 
 # Run our app server
 cd ../server
